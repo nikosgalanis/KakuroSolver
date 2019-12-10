@@ -6,7 +6,7 @@ def sum(list):
     for x in list:
         s += x
     return s
-    
+
 class kakuro(csp.CSP):
     def __init__(self, data_list):
         #create a list of lists of tuples, to keep our data
@@ -67,53 +67,82 @@ class kakuro(csp.CSP):
             line = self.grid[line_no]
             #we're going to traverse the line to find the desired sum
             desired_sum = -1
+            total_variables = 0
             for square in line:
                 #if we find a black square that contains a constraint for the sum
                 if square[0] == 'B' and int(square[1]) != -1:
                     #update the desired sum and break
                     desired_sum = int(square[1])
-                    break
+                elif square[0] == 'W':
+                    #also keep track of the total white suqares in that line
+                    total_variables += 1
+            #initialize the sum of the line by the 2 neighbors given
             sum = a + b
-            i = line_no * self.n_columns
-            for square in line:
-                if square[0] == 'W' and i != A and i != B:
-                    sum += int(self.domain[i][0])
-                i += 1
-            if sum <= desired_sum:
-                return True
-            else:
-                return False
+            #get a dictionary of the assignments in the other neighbors
+            other_neighbors = self.infer_assignment()
+            if A in other_neighbors:
+                del other_neighbors[A]
+            if B in other_neighbors:
+                del other_neighbors[B]
+            #if the length of the dict is equal to the number of white squares,
+            #then all the variables are assigned, so we want to compute the
+            #exact sum of the line
+            all_assigned = (total_variables == (len(other_neighbors) + 2))
+            #get the already assigned values and add them to the sum
+            for n in other_neighbors:
+                if n // self.n_columns == line_no:
+                    sum += other_neighbors[n]
         #if A and B are on the same column
         else:
             #find the column of the neighbors, by modulo operation
             column_no = B % self.n_columns
             #get the squares of the column from the grid
             column = []
+
             for line in self.grid:
                 column.append(line[column_no])
             #we're going to traverse the column to find the desired sum
             desired_sum = -1
+            total_variables = 0
             for square in column:
                 #if we find a black square that contains a constraint for the sum
                 if square[0] == 'B' and int(square[2]) != -1:
                     #update the desired sum and break
                     desired_sum = int(square[2])
-                    break
-            #if A and B add up to the desired sum(or less), all the constraints
-            #are satisfied
-            # sum = a + b
-            # i = column_no
-            # for square in column:
-            #     if square[0] == 'W' and i != A and i != B:
-            #         sum += int(self.domain[i][0])
-            #         i +=
+                elif square[0] == 'W':
+                    total_variables += 1
+            #initialize the sum of the line by the 2 neighbors given
+            sum = a + b
+            #get a dictionary of the assignments in the other neighbors
+            other_neighbors = self.infer_assignment()
+            if A in other_neighbors:
+                del other_neighbors[A]
+            if B in other_neighbors:
+                del other_neighbors[B]
 
-
-            if a + b <= desired_sum or desired_sum == -1:
+            #if the length of the dict is equal to the number of white squares,
+            #then all the variables are assigned, so we want to compute the
+            #exact sum of the line
+            all_assigned = (total_variables == (len(other_neighbors) + 2))
+            #get the already assigned values and add them to the sum
+            for n in other_neighbors:
+                if n % self.n_columns == column_no:
+                    sum += other_neighbors[n]
+            #if we want the exact sum
+        if all_assigned == True:
+            #return true or false accordingly
+            if sum == desired_sum:
                 return True
             else:
                 return False
-
+        #if there are more values to be assigned, return True only if there
+        #is a difference between the sum and the deisred sum(a.k.a another)
+        #variable can be added
+        else:
+            if sum < desired_sum:
+                return True
+            else:
+                return False
 
 
 if __name__ == '__main__':
@@ -124,6 +153,7 @@ if __name__ == '__main__':
         file = open(sys.argv[1], 'r')
         data_list = file.readlines()
         kak = kakuro(data_list)
+        #print(kak.constraints(16,2,17,1))
         bt_result = csp.backtracking_search(kak)
         print(bt_result)
         print(kak.nassigns)
