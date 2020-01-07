@@ -148,6 +148,7 @@ if __name__ == '__main__':
         #organize its lines into a list
         data_list = file.readlines()
         print("Solving a %d x %d kakuro" % (int(data_list[0]),int(data_list[1])))
+
         # Solution with backtracking
         print("BT")
         #initialize the csp
@@ -159,16 +160,7 @@ if __name__ == '__main__':
         print("Assignments", bt_kak.nassigns)
         print("-----------------------------------")
 
-        # Solution with backtracking
-        print("BT+MRV")
-        #initialize the csp
-        btmrv_kak = kakuro(data_list)
-        start = time.time()
-        btmrv_result = csp.backtracking_search(btmrv_kak,select_unassigned_variable=csp.mrv)
-        end = time.time()
-        print("Time elapsed: %.5f" % (end - start))
-        print("Assignments", btmrv_kak.nassigns)
-        print("-----------------------------------")
+
         #Solution with forward checking
         print("FC")
         #initialize the csp
@@ -180,18 +172,7 @@ if __name__ == '__main__':
         print("Assignments", fc_kak.nassigns)
         print("-----------------------------------")
 
-        #Solution with forward checking + mrv
-        print("FC+MRV")
-        #initialize the csp
-        fcmrv_kak = kakuro(data_list)
-        start = time.time()
-        fcmrv_result = csp. backtracking_search(fcmrv_kak,select_unassigned_variable=csp.mrv,inference=csp.forward_checking)
-        end = time.time()
-        print("Time elapsed: %.5f" % (end - start))
-        print("Assignments", fcmrv_kak.nassigns)
-        print("-----------------------------------")
-
-        #Solution with forward checking + mrv
+        #Solution with mac
         print("MAC")
         #initialize the csp
         mac_kak = kakuro(data_list)
@@ -202,4 +183,4 @@ if __name__ == '__main__':
         print("Assignments", mac_kak.nassigns)
         print("-----------------------------------")
 
-        print("Result:", bt_result)
+        print("Result:", fc_result)
